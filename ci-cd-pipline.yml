@@ -38,50 +38,49 @@ jobs:
 
       - name: Train AutoML Model
         run: |
-          python -c "
-import autosklearn.classification  # Пример с AutoML-библиотекой auto-sklearn
-from sklearn.metrics import accuracy_score, f1_score
-import joblib
-import pandas as pd
+          import autosklearn.classification  # Пример с AutoML-библиотекой auto-sklearn
+          from sklearn.metrics import accuracy_score, f1_score
+          import joblib
+          import pandas as pd
+          
+          # Параметры для входных данных
+          train_path = '${{ github.event.inputs.train_dataset_path }}'
+          test_path = '${{ github.event.inputs.test_dataset_path }}'
+          model_name = '${{ github.event.inputs.model_name }}'
+          
+          # Загрузка данных
+          train_data = pd.read_csv(train_path)
+          test_data = pd.read_csv(test_path)
+          
+          # Разделение данных на признаки и целевую переменную
+          X_train, y_train = train_data.drop(columns=['target']), train_data['target']
+          X_test, y_test = test_data.drop(columns=['target']), test_data['target']
+          
+          # Создание и обучение модели AutoML
+          automl = autosklearn.classification.AutoSklearnClassifier()
+          automl.fit(X_train, y_train)
+          
+          # Оценка модели на тестовом наборе
+          y_pred_train = automl.predict(X_train)
+          y_pred_test = automl.predict(X_test)
+          
+          # Метрики
+          train_accuracy = accuracy_score(y_train, y_pred_train)
+          train_f1 = f1_score(y_train, y_pred_train, average='weighted')
+          test_accuracy = accuracy_score(y_test, y_pred_test)
+          test_f1 = f1_score(y_test, y_pred_test, average='weighted')
+          
+          # Сохранение метрик в файлы
+          with open('train_metrics.txt', 'w') as f:
+              f.write(f'Accuracy: {train_accuracy}\\nF1 Score: {train_f1}\\n')
+          
+          with open('test_metrics.txt', 'w') as f:
+              f.write(f'Accuracy: {test_accuracy}\\nF1 Score: {test_f1}\\n')
+          
+          # Сохранение модели
+          joblib.dump(automl, f'{model_name}.pkl')
 
-# Параметры для входных данных
-train_path = '${{ github.event.inputs.train_dataset_path }}'
-test_path = '${{ github.event.inputs.test_dataset_path }}'
-model_name = '${{ github.event.inputs.model_name }}'
-
-# Загрузка данных
-train_data = pd.read_csv(train_path)
-test_data = pd.read_csv(test_path)
-
-# Разделение данных на признаки и целевую переменную
-X_train, y_train = train_data.drop(columns=['target']), train_data['target']
-X_test, y_test = test_data.drop(columns=['target']), test_data['target']
-
-# Создание и обучение модели AutoML
-automl = autosklearn.classification.AutoSklearnClassifier()
-automl.fit(X_train, y_train)
-
-# Оценка модели на тестовом наборе
-y_pred_train = automl.predict(X_train)
-y_pred_test = automl.predict(X_test)
-
-# Метрики
-train_accuracy = accuracy_score(y_train, y_pred_train)
-train_f1 = f1_score(y_train, y_pred_train, average='weighted')
-test_accuracy = accuracy_score(y_test, y_pred_test)
-test_f1 = f1_score(y_test, y_pred_test, average='weighted')
-
-# Сохранение метрик в файлы
-with open('train_metrics.txt', 'w') as f:
-    f.write(f'Accuracy: {train_accuracy}\\nF1 Score: {train_f1}\\n')
-
-with open('test_metrics.txt', 'w') as f:
-    f.write(f'Accuracy: {test_accuracy}\\nF1 Score: {test_f1}\\n')
-
-# Сохранение модели
-joblib.dump(automl, f'{model_name}.pkl')
-"  # Скрипт на Python для обучения и оценки модели
-
+          
       - name: Upload Training Metrics
         uses: actions/upload-artifact@v2
         with:
