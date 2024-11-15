@@ -1,1 +1,2 @@
-# ALFA-HACK-AutoML
+# J-AMAL
+Jazz Automated Machine Analytical Learning
