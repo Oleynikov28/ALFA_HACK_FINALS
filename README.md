@@ -41,6 +41,7 @@ Average Dataset Rating - 3.00
 Jazz Automated Machine Analytical Learning
 
 Модель состоит из 4 блоков:
+
 **Preprocessing**:
 - Типизация
 - Заполнение пропусков
