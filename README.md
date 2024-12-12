@@ -35,7 +35,7 @@ Average Dataset Rating - 3.00
 
 ## Решение
 
-# J-AMAL
+### J-AMAL
 Jazz Automated Machine Analytical Learning
 
 Модель состоит из 4 блоков:
